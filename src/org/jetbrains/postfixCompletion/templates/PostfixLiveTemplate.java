@@ -3,7 +3,7 @@ package org.jetbrains.postfixCompletion.templates;
 import com.intellij.codeInsight.completion.CompletionInitializationContext;
 import com.intellij.codeInsight.completion.CompletionType;
 import com.intellij.codeInsight.completion.JavaCompletionContributor;
-import com.intellij.codeInsight.template.CustomLiveTemplateBase;
+import com.intellij.codeInsight.template.CustomLiveTemplate;
 import com.intellij.codeInsight.template.CustomTemplateCallback;
 import com.intellij.codeInsight.template.impl.TemplateSettings;
 import com.intellij.lang.java.JavaLanguage;
@@ -14,15 +14,12 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.Ref;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
-import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.containers.ContainerUtil;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.postfixCompletion.settings.PostfixCompletionSettings;
@@ -30,7 +27,7 @@ import org.jetbrains.postfixCompletion.util.Aliases;
 
 import java.util.HashMap;
 
-public class PostfixLiveTemplate extends CustomLiveTemplateBase {
+public class PostfixLiveTemplate implements CustomLiveTemplate {
   public static final String POSTFIX_TEMPLATE_ID = "POSTFIX_TEMPLATE_ID";
 
   private static final Logger LOG = Logger.getInstance(PostfixLiveTemplate.class);
@@ -59,12 +56,16 @@ public class PostfixLiveTemplate extends CustomLiveTemplateBase {
   @Override
   public String computeTemplateKey(@NotNull CustomTemplateCallback callback) {
     Editor editor = callback.getEditor();
+    PsiFile file = callback.getContext().getContainingFile();
+    return computeTemplateKey(editor, file);
+  }
+
+  public String computeTemplateKey(Editor editor, PsiFile file) {
     String key = computeTemplateKeyWithoutContextChecking(editor);
-    
     if (key == null) {
       return null;
     }
-    return isApplicableTemplate(getTemplateByKey(key), key, callback.getContext().getContainingFile(), editor) ? key : null;
+    return isApplicableTemplate(getTemplateByKey(key), key, file, editor) ? key : null;
   }
   
   @Nullable
@@ -111,7 +112,7 @@ public class PostfixLiveTemplate extends CustomLiveTemplateBase {
            && file != null
            && settings != null
            && settings.isPostfixPluginEnabled()
-           && PsiUtilCore.getLanguageAtOffset(file, offset) == JavaLanguage.INSTANCE;
+           && file.getLanguage() == JavaLanguage.INSTANCE;
   }
 
   @Override
@@ -136,11 +137,6 @@ public class PostfixLiveTemplate extends CustomLiveTemplateBase {
     return settings != null ? (char)settings.getShortcut() : TemplateSettings.TAB_CHAR;
   }
 
-  @Override
-  public boolean hasCompletionItem(@NotNull PsiFile file, int offset) {
-    return true;
-  }
-
   @Nullable
   public PostfixTemplate getTemplateByKey(@NotNull String key) {
     return myTemplates.get(key);
@@ -161,7 +157,6 @@ public class PostfixLiveTemplate extends CustomLiveTemplateBase {
     });
   }
 
-  @Contract("null, _, _, _ -> false")
   private static boolean isApplicableTemplate(@Nullable PostfixTemplate template, @NotNull String key, @NotNull PsiFile file, @NotNull Editor editor) {
     if (template == null || !template.isEnabled()) {
       return false;
@@ -255,6 +250,6 @@ public class PostfixLiveTemplate extends CustomLiveTemplateBase {
   private static boolean isSemicolonNeeded(@NotNull PsiFile file, @NotNull Editor editor) {
     CompletionInitializationContext initializationContext = new CompletionInitializationContext(editor, file, CompletionType.BASIC);
     new JavaCompletionContributor().beforeCompletion(initializationContext);
-    return StringUtil.endsWithChar(initializationContext.getDummyIdentifier(), ';');
+    return initializationContext.getFileCopyPatcher().toString().endsWith(";\"");
   }
 }

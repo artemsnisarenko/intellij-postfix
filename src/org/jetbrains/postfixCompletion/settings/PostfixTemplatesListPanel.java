@@ -64,10 +64,10 @@ public class PostfixTemplatesListPanel {
     myTemplatesTableView.setStriped(true);
     myTemplatesTableView.setBorder(null);
 
-    new TableViewSpeedSearch<PostfixTemplate>(myTemplatesTableView) {
+    new TableViewSpeedSearch(myTemplatesTableView) {
       @Override
-      protected String getItemText(@NotNull PostfixTemplate template) {
-        return template.getPresentableName();
+      protected String getElementText(Object element) {
+        return ((PostfixTemplate) element).getPresentableName();
       }
     };
 

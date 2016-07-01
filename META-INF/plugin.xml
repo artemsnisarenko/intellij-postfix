@@ -3,8 +3,6 @@
   <name>Postfix Completion</name>
   <version>0.8-beta</version>
   <vendor email="alexander.shvedov@jetbrains.com" url="https://github.com/controlflow">Alexander Shvedov, Alexander Zolotov, Sergey Ignatov</vendor>
-  <depends>com.intellij.modules.lang</depends>
-  <depends>com.intellij.modules.java</depends>
 
   <description><![CDATA[
       The basic idea is to prevent caret jumps backward while typing code,
@@ -68,7 +66,7 @@
       New <b>.fori</b> and <b>.forr</b> templates iteration with index.<br/><br/>
 ]]></change-notes>
 
-  <idea-version since-build="130.754"/>
+  <idea-version since-build="129.1525"/>
 
   <extensionPoints>
     <extensionPoint name="postfixTemplate" interface="org.jetbrains.postfixCompletion.templates.PostfixTemplate"/>

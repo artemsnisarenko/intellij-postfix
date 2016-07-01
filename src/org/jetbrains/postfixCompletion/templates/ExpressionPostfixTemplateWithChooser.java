@@ -30,13 +30,18 @@ public abstract class ExpressionPostfixTemplateWithChooser extends PostfixTempla
 
   @Override
   public boolean isApplicable(@NotNull PsiElement context, @NotNull Document copyDocument, int newOffset) {
-    Editor editor = EditorFactory.getInstance().createEditor(copyDocument);
+    final Editor editor = EditorFactory.getInstance().createEditor(copyDocument);
     boolean result;
     try {
       result = !getExpressions(context, editor, newOffset).isEmpty();
     }
     finally {
-      EditorFactory.getInstance().releaseEditor(editor);
+      ApplicationManager.getApplication().invokeLater(new Runnable() {
+        @Override
+        public void run() {
+          EditorFactory.getInstance().releaseEditor(editor);
+        }
+      });
     }
     return result;
   }

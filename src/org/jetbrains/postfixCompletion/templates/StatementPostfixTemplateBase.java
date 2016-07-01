@@ -1,6 +1,6 @@
 package org.jetbrains.postfixCompletion.templates;
 
-import com.intellij.codeInsight.CodeInsightUtilCore;
+import com.intellij.codeInsight.CodeInsightUtilBase;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
@@ -28,7 +28,7 @@ public abstract class StatementPostfixTemplateBase extends PostfixTemplate {
     statement = parent.replace(statement);
 
     //noinspection ConstantConditions
-    PsiCodeBlock block = CodeInsightUtilCore.forcePsiPostprocessAndRestoreElement(PsiTreeUtil.getChildOfType(statement, PsiCodeBlock.class));
+    PsiCodeBlock block = CodeInsightUtilBase.forcePsiPostprocessAndRestoreElement(PsiTreeUtil.getChildOfType(statement, PsiCodeBlock.class));
     TextRange range = block.getStatements()[0].getTextRange();
     editor.getDocument().deleteString(range.getStartOffset(), range.getEndOffset());
 

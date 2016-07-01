@@ -3,7 +3,7 @@ package org.jetbrains.postfixCompletion.completion;
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
-import com.intellij.codeInsight.template.CustomTemplateCallback;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.patterns.StandardPatterns;
 import com.intellij.psi.PsiFile;
@@ -24,9 +24,9 @@ class PostfixTemplatesCompletionProvider extends CompletionProvider<CompletionPa
 
     PostfixLiveTemplate postfixLiveTemplate = getPostfixLiveTemplate(parameters.getOriginalFile(), parameters.getOffset());
     if (postfixLiveTemplate != null) {
+      Editor editor = parameters.getLookup().getEditor();
       PsiFile file = parameters.getPosition().getContainingFile();
-      final CustomTemplateCallback callback = new CustomTemplateCallback(parameters.getEditor(), file, false);
-      String computedKey = postfixLiveTemplate.computeTemplateKey(callback);
+      String computedKey = postfixLiveTemplate.computeTemplateKey(editor, file);
       if (computedKey != null) {
         PostfixTemplate template = postfixLiveTemplate.getTemplateByKey(computedKey);
         if (template != null) {
@@ -35,7 +35,7 @@ class PostfixTemplatesCompletionProvider extends CompletionProvider<CompletionPa
         }
       }
 
-      String possibleKey = postfixLiveTemplate.computeTemplateKeyWithoutContextChecking(parameters.getEditor());
+      String possibleKey = postfixLiveTemplate.computeTemplateKeyWithoutContextChecking(editor);
       if (StringUtil.isNotEmpty(possibleKey)) {
         result = result.withPrefixMatcher(possibleKey);
         result.restartCompletionOnPrefixChange(StandardPatterns.string().startsWith(possibleKey));

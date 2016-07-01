@@ -7,6 +7,7 @@ import com.intellij.codeInsight.template.impl.LiveTemplateLookupElement;
 import com.intellij.codeInsight.template.impl.TemplateImpl;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.SystemInfo;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.postfixCompletion.templates.PostfixLiveTemplate;
@@ -19,8 +20,13 @@ class PostfixTemplateLookupElement extends LiveTemplateLookupElement {
   private final PostfixTemplate myTemplate;
 
   public PostfixTemplateLookupElement(@NotNull PostfixTemplate template, char shortcut) {
-    super(createStubTemplate(template, shortcut), template.getPresentableName(), true, true);
+    super(createStubTemplate(template, shortcut), true);
     myTemplate = template;
+  }
+
+  @Override
+  public boolean isWorthShowingInAutoPopup() {
+    return true;
   }
 
   @NotNull
@@ -31,6 +37,7 @@ class PostfixTemplateLookupElement extends LiveTemplateLookupElement {
   @Override
   public void renderElement(LookupElementPresentation presentation) {
     super.renderElement(presentation);
+    presentation.setItemText(StringUtil.notNullize(myTemplate.getPresentableName(), myTemplate.getKey()));
     presentation.setTailText(" " + arrow() + " " + myTemplate.getExample());
   }
 
